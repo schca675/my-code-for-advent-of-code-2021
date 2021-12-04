@@ -65,7 +65,7 @@ def get_input_data(filepath):
         while start_i < len(lines):
             bingo_nrs = [line.rstrip().split() for line in lines[start_i:start_i+5]]
             list_bingo_cards.append(BingoCard(pd.DataFrame(bingo_nrs), bingo_id))
-            bingo_id += 0
+            bingo_id += 1
             start_i += 6
     return drawn_numbers, list_bingo_cards
 
