@@ -1,3 +1,4 @@
+### #### PUZZLE 4 - 02/12/2021 Giant Squid!
 import pandas as pd
 import numpy as np
 
@@ -37,12 +38,12 @@ class BingoCard:
         return False
 
     def get_score(self):
+        # The score of the winning board can now be calculated. Start by finding the sum of all unmarked numbers on that board
         sum_unmarked = 0
         for row_index, row in self.marked_numbers.iterrows():
             for colum_index, value in row.items():
                 if value == 0: # e.g unmarked
                     sum_unmarked += int(self.bingo_card.at[row_index, colum_index])
-        # The score of the winning board can now be calculated. Start by finding the sum of all unmarked numbers on that board
         return sum_unmarked
 
     def __str__(self):
@@ -88,11 +89,11 @@ def resolve_puzzle_4_part1(filepath):
         i+=1
 
 #TEST
-# print("TEST")
-# resolve_puzzle_4_part1("test_data_4.txt")
-#
-# print("PUZZLE")
-# resolve_puzzle_4_part1("data_4.txt")
+print("TEST")
+resolve_puzzle_4_part1("test_data_4.txt")
+
+print("PUZZLE")
+resolve_puzzle_4_part1("data_4.txt")
 
 def resolve_puzzle4_part2(filepath):
     # What is the last bingocard to win
