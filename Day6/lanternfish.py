@@ -2,6 +2,7 @@
 
 class Lanternfish:
     reproduction_value = 7
+
     def __init__(self, fish_timer_str):
         self.internal_timer = int(fish_timer_str)
 
@@ -9,7 +10,7 @@ class Lanternfish:
         # new fish is created when timer is reset to 6, so when current timer is 0
         if self.internal_timer == 0:
             self.internal_timer = self.reproduction_value - 1 # -1 since 0 is also taken into account
-            return True, Lanternfish('8')
+            return True, Lanternfish(str(self.reproduction_value + 2 - 1))
         # otherwise only update (this will not be negative)
         self.internal_timer = self.internal_timer - 1 % self.reproduction_value
         # otherwise no new fish is created
