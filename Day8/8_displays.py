@@ -118,17 +118,16 @@ def resolve_puzzle_part2(filepath):
     for display in displays:
         display.solve()
         digits, digits_str, number = display.decrypt_digits()
-        print(display.digits, ":", digits_str)
+        # print(display.digits, ":", digits_str)
         tot_digits += number
     print("PUZZLE SOLUTION: {} sum of all digits".format(tot_digits))
 
-# print("TEST")
-# resolve_puzzle_part1("test_data.txt")
-# print("PUZZLE")
-# resolve_puzzle_part1("data.txt")
-#
-# print("TEST")
+print("TEST")
+resolve_puzzle_part1("test_data.txt")
+print("PUZZLE")
+resolve_puzzle_part1("data.txt")
+
+print("TEST")
 resolve_puzzle_part2("test_data.txt")
-# resolve_puzzle_part2("errorish.txt")
 print("PUZZLE")
 resolve_puzzle_part2("data.txt")
