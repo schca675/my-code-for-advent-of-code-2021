@@ -128,7 +128,7 @@ def resolve_puzzle_part2(filepath):
 # resolve_puzzle_part1("data.txt")
 #
 # print("TEST")
-# resolve_puzzle_part2("test_data.txt")
-resolve_puzzle_part2("errorish.txt")
+resolve_puzzle_part2("test_data.txt")
+# resolve_puzzle_part2("errorish.txt")
 print("PUZZLE")
-# resolve_puzzle_part2("data.txt")
+resolve_puzzle_part2("data.txt")
