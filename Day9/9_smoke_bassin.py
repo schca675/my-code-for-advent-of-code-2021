@@ -20,19 +20,19 @@ def is_lower_field(i, j, field):
         return False
     # lower than right? yes, continue; no -> return False
     if i+1 < len(field):
-        if field[i][j] >= field[i+1][j]:
+        if field[i][j] > field[i+1][j]:
             return False
     # lower than left
     if i-1 >= 0:
-        if field[i][j] >= field[i-1][j]:
+        if field[i][j] > field[i-1][j]:
             return False
     # lower than upper
     if j-1 >= 0:
-        if field[i][j] >= field[i][j-1]:
+        if field[i][j] > field[i][j-1]:
             return False
     # lower than lower
     if j+1 < len(field[0]):
-        if field[i][j] >= field[i][j+1]:
+        if field[i][j] > field[i][j+1]:
             return False
     return True
 
@@ -45,19 +45,19 @@ def is_lower_field_bassin(i, j, field, already_in_bassin):
         # height 9 are never part of any bassin
         return False
     if i+1 < len(field) and (i+1, j) not in already_in_bassin:
-        if field[i][j] >= field[i+1][j]:
+        if field[i][j] > field[i+1][j]:
             return False
     # lower than left
     if i-1 >= 0 and (i-1, j) not in already_in_bassin:
-        if field[i][j] >= field[i-1][j]:
+        if field[i][j] > field[i-1][j]:
             return False
     # lower than upper
     if j-1 >= 0 and (i, j-1) not in already_in_bassin:
-        if field[i][j] >= field[i][j-1]:
+        if field[i][j] > field[i][j-1]:
             return False
     # lower than lower
     if j+1 < len(field[0]) and (i, j+1) not in already_in_bassin:
-        if field[i][j] >= field[i][j+1]:
+        if field[i][j] > field[i][j+1]:
             return False
     return True
 
@@ -99,6 +99,8 @@ def grow_bassin(field, from_position, in_bassin_already):
     to_check = get_pos_to_check(from_position, in_bassin_already, field)
     # for every potential new place in the bassin check whether it is a lower field:
     for pos in to_check:
+        if pos == (83, 44):
+            pass
         ## check whether it is a lower field: ignore elements that are already in bassin, they could be lower
         if is_lower_field_bassin(pos[0], pos[1], field, in_bassin_already):
             in_bassin_already.add(pos) # add position to the bassin
@@ -120,7 +122,7 @@ def resolve_puzzle_part1(filepath):
     field = get_puzzle_input(filepath)
     lower_fields, _ = get_lower_fields(field)
     risk_levels = [1 + height for height in lower_fields]
-    print("PUZZLE SOLUTION: {} total risk level".format(sum(risk_levels)))
+    print("PUZZLE SOLUTION: {} total risk level, {} total fields".format(sum(risk_levels), len(lower_fields)))
 
 
 def resolve_puzzle_part2(filepath):
@@ -145,12 +147,23 @@ def resolve_puzzle_part2(filepath):
             if (i,j) not in all_indices_counted:
                 not_in_bassin.add((i,j))
     print(not_in_bassin)
-# print("TEST")
-# resolve_puzzle_part1("test_data.txt")
-# print("PUZZLE")
-# resolve_puzzle_part1("data.txt")
-#
+    # print field
+    str_field = []
+    for i in range(0, len(field)):
+        str_field.append(["|{}:{:3d}".format(x, 0) if x != 9 else "|{}:{:3d}".format(x, 9) for x in field[i]])
+    i = 10
+    for bassin in bassins:
+        for pos in bassin:
+            str_field[pos[0]][pos[1]] = "|{}:{:3d}".format(field[pos[0]][pos[1]], i)
+        i+=1
+    for line in str_field:
+        print("".join(line))
 print("TEST")
-resolve_puzzle_part2("test_data.txt")
+# resolve_puzzle_part1("test_data.txt")
+print("PUZZLE")
+resolve_puzzle_part1("data.txt")
+
+print("TEST")
+# resolve_puzzle_part2("test_data.txt")
 print("PUZZLE")
 resolve_puzzle_part2("data.txt")
