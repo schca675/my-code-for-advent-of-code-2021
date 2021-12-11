@@ -86,9 +86,6 @@ def resolve_puzzle_part1_and2(filepath, rounds):
         if nr_flashed == 100: # hardcoded how many, can also say len time slen
             break
 
-        # # Check how many flashed this step: (cumulative score)
-        # total_round= sum([sum([octopus.times_flashed for octopus in octopus_line]) for octopus_line in octopi_grid])
-        # print("{} flashed in step {}".format(total_round, i+1))
     total_flashes = sum([sum([octopus.times_flashed for octopus in octopus_line]) for octopus_line in octopi_grid])
     print("PUZZLE SOLUTION Part 1: total_flashes after {} steps: {}".format(step, total_flashes))
     print("PUZZLE part 2: all flash on rounds {}".format(step))
@@ -99,8 +96,3 @@ print("TEST")
 resolve_puzzle_part1_and2("test_data.txt", 10000)
 print("PUZZLE")
 resolve_puzzle_part1_and2("data.txt", 10000)
-#
-# print("TEST")
-# resolve_puzzle_part2("test_data.txt")
-# print("PUZZLE")
-# resolve_puzzle_part2("data.txt")
