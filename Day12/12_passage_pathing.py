@@ -1,12 +1,17 @@
 # --- Day 12: Passage Pathing ---
+import copy
+
 
 class Path:
-    def __init__(self, cave, steps_taken, next_step, ):
-        self.cave = cave
-        self.has_visited_lower_caves = dict()
-        for node in cave.nodes:
-            if node == node.lower():
+    def __init__(self, cave, steps_taken, next_step, has_visited_lower_caves):
+        self.has_visited_lower_caves = has_visited_lower_caves
+        if len(has_visited_lower_caves) == 0:
+            for node in cave.nodes:
+                # set all nodes to False, upper-case ones will stay false
                 self.has_visited_lower_caves[node] = False
+        # if it is a lower case step: set it to true if that is the next step
+        if next_step == next_step.lower():
+            self.has_visited_lower_caves[next_step] = True
         self.steps_taken = steps_taken
         self.steps_taken.append(next_step)
 
@@ -26,12 +31,21 @@ class Cave:
             self.neighbours[edge[1]] = conn_b
 
     def get_all_paths(self, paths_so_far):
-        updated_paths = []
+        all_paths = []
         for path in paths_so_far:
-            # Check next steps
+            updated_paths = []
+            # if path has reached end --> skip
+            if path.steps_taken[-1] == 'end':
+                # end is reached, so we attach it to all paths without next steps
+                all_paths.append(path)
+                continue
+            # Else: Check next steps and add those to final list
             for poss_steps in self.neighbours[path.steps_taken[-1]]:
-                updated_paths.append(Path(self.steps_taken, self.next_step))
-        return updated_paths
+                if not path.has_visited_lower_caves[poss_steps]:
+                    new_path = Path(self, copy.deepcopy(path.steps_taken), poss_steps, copy.deepcopy(path.has_visited_lower_caves))
+                    updated_paths.append(new_path)
+            all_paths.extend(self.get_all_paths(updated_paths))
+        return all_paths
 
 
 def get_puzzle_input(filepath):
@@ -48,8 +62,8 @@ def get_puzzle_input(filepath):
 
 def resolve_puzzle_part1(filepath):
     cave = get_puzzle_input(filepath)
-    paths = cave.get_all_paths([])
-    print("PUZZLE SOLUTION: {} unique paths".format(paths))
+    paths = cave.get_all_paths([Path(cave, [], 'start', dict())])
+    print("PUZZLE SOLUTION: {} unique paths".format(len(paths)))
 
 def resolve_puzzle_part2(filepath):
     pass
@@ -57,7 +71,7 @@ def resolve_puzzle_part2(filepath):
 print("TEST")
 resolve_puzzle_part1("test_data.txt")
 print("PUZZLE")
-# resolve_puzzle_part1("data.txt")
+resolve_puzzle_part1("data.txt")
 #
 # print("TEST")
 # resolve_puzzle_part2("test_data.txt")
