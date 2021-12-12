@@ -1,12 +1,16 @@
 # --- Day 12: Passage Pathing ---
 
 class Path:
-    def __init__(self, cave):
+    def __init__(self, cave, steps_taken, next_step, ):
         self.cave = cave
         self.has_visited_lower_caves = dict()
         for node in cave.nodes:
             if node == node.lower():
                 self.has_visited_lower_caves[node] = False
+        self.steps_taken = steps_taken
+        self.steps_taken.append(next_step)
+
+
 
 class Cave:
     def __init__(self, nodes, edges):
@@ -21,34 +25,34 @@ class Cave:
             self.neighbours[edge[0]] = conn_a
             self.neighbours[edge[1]] = conn_b
 
+    def get_all_paths(self, paths_so_far):
+        updated_paths = []
+        for path in paths_so_far:
+            # Check next steps
+            for poss_steps in self.neighbours[path.steps_taken[-1]]:
+                updated_paths.append(Path(self.steps_taken, self.next_step))
+        return updated_paths
+
 
 def get_puzzle_input(filepath):
-    displays = []
+    nodes = set()
+    edges = set()
     with open(filepath) as f:
         for line in f:
-            parts = line.rstrip().split('|')
-            display = DisplaySolver(patterns=parts[0].split(), digits=parts[1].split())
-            displays.append(display)
-    return displays
+            [node_1, node_2] = line.rstrip().split('-')
+            nodes.add(node_1)
+            nodes.add(node_2)
+            edges.add((node_1, node_2))
+    return Cave(nodes, edges)
 
 
 def resolve_puzzle_part1(filepath):
-    displays = get_puzzle_input(filepath)
-    tot_unique_digits = 0
-    for display in displays:
-        digit_count = display.get_and_count_unique_digits()
-        tot_unique_digits += digit_count
-    print("PUZZLE SOLUTION: {} unique digits".format(tot_unique_digits))
+    cave = get_puzzle_input(filepath)
+    paths = cave.get_all_paths([])
+    print("PUZZLE SOLUTION: {} unique paths".format(paths))
 
 def resolve_puzzle_part2(filepath):
-    displays = get_puzzle_input(filepath)
-    tot_digits = 0
-    for display in displays:
-        display.solve()
-        digits, digits_str, number = display.decrypt_digits()
-        # print(display.digits, ":", digits_str)
-        tot_digits += number
-    print("PUZZLE SOLUTION: {} sum of all digits".format(tot_digits))
+    pass
 
 print("TEST")
 resolve_puzzle_part1("test_data.txt")
