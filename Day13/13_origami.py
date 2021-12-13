@@ -60,7 +60,7 @@ def resolve_puzzle(filepath, only_first):
             last_x = -1
 
         # add dots til the x index of the point is hit
-        grid_string += '.'*(point[0] - last_x -1)
+        grid_string += ' '*(point[0] - last_x -1)
         # add # character to mark this point, should now be correct index
         grid_string += '#'
         # update metrics
