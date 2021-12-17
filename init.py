@@ -2,7 +2,7 @@ import os
 import errno
 
 for i in range(10, 26):
-    filename = "Day{}/test_data.txt".format(i)
+    filename = "Day{}/test_data_operator_packet.txt".format(i)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
