@@ -119,6 +119,7 @@ class Position:
                 return True
             t -= 1
 
+        #### has some mistake in it...
         # next_t = round(self.vx/2)
         # prev_t = self.vx
         # while next_t != prev_t:
