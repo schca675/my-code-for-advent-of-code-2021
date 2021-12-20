@@ -1,23 +1,15 @@
 # --- Day 18: Snailfish ---
+import copy
 import math
+import re
 
 
 class snail_fish_number:
     def __init__(self, number_str):
-        self.number = self.parse_number(number_str)
         self.representation = number_str
 
-    def parse_number(self, number_str):
-        # [1:-1] to remove outer brackets surrounding number
-        [left, right] = number_str[1:-1].split(',')
-        if '[' in left:
-            left = self.parse_number(left)
-        if '[' in right:
-            right = self.parse_number(right)
-        return [int(left), int(right)]
-
-    def reduce_number_once(self):
-        rep = str(self.number)
+    def reduce_number_once(self, also_split=False):
+        rep = copy.deepcopy(self.representation)
         i = 0
         index_leftmost = -1
         index_left_end = -1
@@ -34,12 +26,17 @@ class snail_fish_number:
                     no_action = False
                     # Exploding pairs always consist of regular numbers,
                     # so i1234
-                    #    [2,3]
-                    left = int(rep[i+1])
-                    right = int(rep[i+3])
+                    #    [2,3] or [12, 10]
+                    # find the length of current bracket
+                    m = re.search("]", rep[i+1:])
+                    next_bracket =i+5
+                    if m:
+                        next_bracket = i + 2 + m.start()  # i+1 for start index, then + 1 to get placement after ]
+                    [left, right] = rep[i+1:next_bracket-1].split(',')
+                    left, right = int(left), int(right)
                     # if there are no numbers to the left or right, we keep the original:
                     left_rep = rep[:i]
-                    right_rep = rep[i+5:]
+                    right_rep = rep[next_bracket:]
 
                     # if there is one: add left to next left number
                     if index_leftmost > 0:
@@ -48,31 +45,27 @@ class snail_fish_number:
                         left_rep = "{}{}{}".format(rep[:index_leftmost], new_number, rep[index_left_end+1:i])
 
                     # if there is one to the right
-                    right_int = ''
-                    right_i = i+1
-                    right_first_i = -1
-                    while right_i < len(rep):
-                        if rep[right_i].isdigit():
-                            # check if number is larger
-                            right_first_i = i
-                            right_int += rep[right_i]
-                            right_i += 1
-                            while rep[right_i].isdigit():
-                                right_int += rep[right_i]
-                                right_i += 1
-                            right_int = int(right_int) + right
-                            break
-                    if right_first_i > i:
-                        # was changed, we can update right representation
-                        right_rep = "{}{}{}".format(rep[:right_first_i], right_int, rep[right_i:]) # right_i is first index where there was no digit anymore
+                    m = re.search(r"\d", rep[next_bracket:])
+                    if m:
+                        right_first_i = next_bracket + m.start()
+                        right_end_i = right_first_i
+                        right_int = rep[right_first_i]
+                        while rep[right_end_i + 1].isdigit():
+                            right_end_i += 1
+                            right_int += rep[right_end_i]
+                        right_int = int(right_int) + right
+                        right_rep = "{}{}{}".format(rep[next_bracket:right_first_i], right_int, rep[right_end_i+1:])
+                        # right_i is first index where there was no digit anymore
 
                     # add right to next right number
                     # replace exploding part by 0
                     rep = "{}{}{}".format(left_rep,0,right_rep)
+                    self.representation = rep
             elif c == ']':
                 depth -= 1
             elif c != ',':
                 index_leftmost = i
+                index_left_end = i
                 # then c must be an integer
                 while rep[i+1].isdigit():
                     i += 1
@@ -82,64 +75,109 @@ class snail_fish_number:
                 c = int(c)
                 nr_leftmost = c
 
-                if c >= 10:
+                if also_split and c >= 10:
                     # SPLITS
+                    no_action = False
                     c = c/2
                     rep = "{}{}{}".format(rep[:index_leftmost],[math.floor(c), math.ceil(c)], rep[i+1:])
-                    self.number = self.parse_number(rep)
-                    no_action = False
+                    self.representation = rep
+            i +=1
         return no_action
 
     def reduce_number(self):
         no_action = False
         while not no_action:
-            no_action = self.reduce_number_once()
-
-
-
-    def get_rep(self, parent):
-        [left, right] = parent
-        if type(left) != int:
-            left = self.get_rep(left)
-        left_rep = "[{},".format(left)
-        if type(right) != int:
-            right = self.get_rep(right)
-        right_rep = "{}]".format(right)
-        return left_rep + right_rep
+            # check only explodes first
+            while not no_action:
+                no_action = self.reduce_number_once()
+            no_action = self.reduce_number_once(also_split=True)
 
     def __str__(self):
-        self.representation = self.get_rep(self.number)
         return self.representation
 
-
     def add_number_to_it(self, other):
-        self.number = [self.number, other]
+        self.representation = "[{},{}]".format(self.representation, other.representation)
         self.reduce_number()
+
+    def parse_number(self):
+        # [1:-1] to remove outer brackets surrounding number
+        [left, right] = self.representation[1:-1].split('')
+        if '[' in left:
+            left = self.parse_number()
+        if '[' in right:
+            right = self.parse_number()
+        return [int(left), int(right)]
+
+    def get_magnitude(self):
+        # if there is one to the right
+        magnitude = copy.deepcopy(self.representation)
+        m = re.search(r'\[\d+,\d+\]', magnitude)
+        while m:
+            start = m.start()
+            end = m.end()
+            [left, right] = magnitude[start+1: end-1].split(',')
+            magnitude = "{}{}{}".format(magnitude[:start], 3*int(left) + 2*int(right), magnitude[end:])
+            m = re.search(r'\[\d+,\d+\]', magnitude)
+        return magnitude
 
 
 def get_puzzle_input(filepath):
-    field = []
-    image_alg = ""
-    first_line = True
+    snail_fish_numbers = []
     with open(filepath) as f:
         for line in f:
-            if first_line:
-                image_alg = line.rstrip()
-                first_line = False
-                continue
-            if len(line) > 1:
-                # FIeld
-                field.append(line.rstrip())
-    return image_alg, field
+            snail_fish_numbers.append(snail_fish_number(line.rstrip()))
+    return snail_fish_numbers
 
-def resolve_puzzle(filepath, times):
-    image_alg, field = get_puzzle_input(filepath)
-    print("{}\nPUZZLE SOLUTION: {} light pixels".format(filepath, magnitude))
+
+def resolve_puzzle(filepath):
+    snail_fish_numbers = get_puzzle_input(filepath)
+    # add all snailfish to first one:
+    for i in range(1, len(snail_fish_numbers)):
+        snail_fish_numbers[0].add_number_to_it(snail_fish_numbers[i])
+    magnitude = snail_fish_numbers[0].get_magnitude()
+    print("{}\nPUZZLE SOLUTION: {}\n magnitude: {} ".format(filepath,
+                                                            snail_fish_numbers[0], magnitude))
+
+def resolve_puzzle_part2(filepath):
+    print(filepath)
+    snail_fish_numbers = get_puzzle_input(filepath)
+    max_mag = 0
+    for i in range(0, len(snail_fish_numbers)):
+        rep = copy.deepcopy(snail_fish_numbers[i].representation)
+        for j in range(0, len(snail_fish_numbers)):
+            if i !=j:
+                snail_fish_numbers[i].representation = copy.deepcopy(rep)
+                snail_fish_numbers[i].add_number_to_it(snail_fish_numbers[j])
+                # sometimes spaces appear
+                snail_fish_numbers[i].representation = snail_fish_numbers[i].representation.replace(' ', '')
+                mag = int(snail_fish_numbers[i].get_magnitude())
+                # print(rep, " + \n", snail_fish_numbers[j], " = \n", str(mag))
+                if mag > max_mag:
+                    max_mag = mag
+        snail_fish_numbers[i].representation = copy.deepcopy(rep)
+    print("MAX Magnitude:", max_mag)
+
+def test():
+    # Get string representation of two fish
+    test_snailfish = get_puzzle_input("test_snails.txt")
+    test_snailfish[0].reduce_number()
+    for i in range(1, len(test_snailfish)):
+        test_snailfish[0].add_number_to_it(test_snailfish[i])
+    print("TEST: Resulting fish: ", str(test_snailfish[0]))
+
+def test_mag():
+    test_snailfish = get_puzzle_input("test_magnitudes")
+    for fish in test_snailfish:
+        print(fish)
+        print(fish.get_magnitude())
+# test()
+# test_mag()
 
 print("Part 1")
-resolve_puzzle("test_data.txt", 2)
-resolve_puzzle("data.txt", 2)
-
-print( "Part 2")
-resolve_puzzle("test_data.txt", 50)
-resolve_puzzle("data.txt", 50)
+# resolve_puzzle("test_data.txt")
+# # resolve_puzzle("sum_example.txt")
+# resolve_puzzle("data.txt")
+# #
+# print( "Part 2")
+resolve_puzzle_part2("test_data.txt")
+resolve_puzzle_part2("data.txt")
