@@ -18,9 +18,7 @@ def get_puzzle_input(filepath):
 
 def resolve_puzzle(filepath, times):
     image_alg, field = get_puzzle_input(filepath)
-    new_field_bin, new_field = apply_image_processing(field, image_alg, times)
-    lights = count_light_pixels(new_field_bin)
-    print("{}\nPUZZLE SOLUTION: {} light pixels".format(filepath, lights))
+    print("{}\nPUZZLE SOLUTION: {} light pixels".format(filepath, 0))
 
 print("Part 1")
 resolve_puzzle("test_data.txt", 2)
